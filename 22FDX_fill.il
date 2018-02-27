@@ -1,12 +1,10 @@
-; zoltan.tibenszky@tu-dredsen.de
+; zoltan.tibenszky@gmail.com
 ; v0.1:  2017-06-12
 ; v0.2:  2017-09-28 - Extending functionality with fill script
 ; v0.2a: 2017-10-10 - Resetted the control bits DO_xxx after run, to avoid problems with manual stream-out callback.
 ;
 ; To do ideas:
-;	- Create a window, with radio buttons where the different options could be selected
-;		* A debug mode could have been added as well
-;	- The backup of "layout" cellview's name would contain the date
+;	- The backup of "layout" cellview's name would contain the date, but it would create too much "noise" in the Library Manager...
 
 
 DEBUG			 = nil  ; nir ot t
