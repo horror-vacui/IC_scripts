@@ -1,0 +1,10 @@
+procedure( ztiGetCurrentTime(@optional (format "%y%m%d_%H%M"))
+prog( (id out str)
+   sprintf(str "date +%s" format)
+   id=ipcBeginProcess(str)
+   ipcWaitForProcess(id)
+   out = ipcReadProcess(id 10)
+   ipcKillProcess(id)
+   return(car(parseString(out "\n")))
+)) ;ztiGetCurrentTime()
+
