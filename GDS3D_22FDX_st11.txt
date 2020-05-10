@@ -1,0 +1,317 @@
+# This file describes stack 11 geometry of 22FDX from GLOBALFOUNDRIES.
+# The heights are just estimated, and thus can be - probably are - inaccurate
+# The colors correspond to the PDK default PDK colors
+
+# Do not remove this layer, it must always be here with GDS layer number 255
+LayerStart: Substrate
+Layer: 255
+Height: -900
+Thickness: 900
+Red: 0.0
+Green: 1.0
+Blue: 1.0
+Filter: 0.5
+Metal: 0
+Show: 1
+LayerEnd
+
+# Start editing here
+LayerStart: NW
+Layer: 4		# GDS layer number
+Height: -600		# Start height
+Thickness: 600		# Stop height = start height + thickness
+Red: 0.25		# Color red component, [0,1]
+Green: 0.25		# Color green component, [0,1]
+Blue: 0.25		# Color blue component, [0,1]
+Filter: 0.0		# Keep at 0 (controls transparency)
+Metal: 0		# Not used at the moment
+Shortkey: 0		# Defines a shortkey from 0 to 9 to toggle the layer visibility. Can be pre-pended with any combination 
+			# of <Alt> <Ctrl> and <Shift> as modifiers
+Show: 1			# Shown during rendering
+LayerEnd
+
+LayerStart: Poly
+Layer: 7
+Height: 0
+Thickness: 30
+Red: 1
+Green: 0
+Blue: 0
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: CA
+Layer: 14
+Height: 30
+Thickness: 130
+Red: 1.0
+Green: 1.0
+Blue: 0.0
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: CB
+Layer: 245
+Height: 0
+Thickness: 100
+Red: 1.0
+Green: 0.9
+Blue: 0.75
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: M1
+Layer: 15
+Height: 130
+Thickness: 80
+Red: 0.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 1
+Show: 1
+LayerEnd
+
+LayerStart: V1
+Layer: 16
+Height: 210
+Thickness: 80
+Red: 0.50
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 1
+Show: 1
+LayerEnd
+
+LayerStart: M2
+Layer: 17
+Height: 290
+Thickness: 80
+Red: 1.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 2
+Show: 1
+LayerEnd
+
+LayerStart: AY
+Layer: 213
+Height: 370
+Thickness: 80
+Red: 1
+Green: 0.9
+Blue: 0.75
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 2
+Show: 1
+LayerEnd
+
+LayerStart: C1
+Layer: 187
+Height: 450
+Thickness: 90
+Red: 1.0
+Green: 0.5
+Blue: 0.0
+Filter: 0.0
+Metal: 1
+Shortkey: 3
+Show: 1
+LayerEnd
+
+LayerStart: A1
+Layer: 188
+Height: 540
+Thickness: 100
+Red: 0.88
+Green: 0.7
+Blue: 0.98
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 3
+Show: 1
+LayerEnd
+
+LayerStart: C2
+Layer: 197
+Height: 640
+Thickness: 90
+Red: 1.0
+Green: 0
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 4
+Show: 1
+LayerEnd
+
+LayerStart: A2
+Layer: 138
+Height: 730
+Thickness: 100
+Red: 0.88
+Green: 0.7
+Blue: 0.98
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 4
+Show: 1
+LayerEnd
+
+LayerStart: C3
+Layer: 140
+Height: 830
+Thickness: 90
+Red: 0.17
+Green: 0.8
+Blue: 0.9
+Filter: 0.0
+Metal: 1
+Shortkey: 5
+Show: 1
+LayerEnd
+
+LayerStart: A3
+Layer: 152
+Height: 920
+Thickness: 100
+Red: 1
+Green: 0.75
+Blue: 0.95
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 5
+Show: 1
+LayerEnd
+
+LayerStart: C4
+Layer: 41
+Height: 1020
+Thickness: 90
+Red: 0.9
+Green: 0.12
+Blue: 0.05
+Filter: 0.0
+Metal: 1
+Shortkey: 6
+Show: 1
+LayerEnd
+
+LayerStart: A4
+Layer: 153
+Height: 1110
+Thickness: 100
+Red: 0
+Green: 0
+Blue: 1
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 6
+Show: 1
+LayerEnd
+
+LayerStart: C5
+Layer: 141
+Height: 1210
+Thickness: 90
+Red: 0.6
+Green: 0.0
+Blue: 0.9
+Filter: 0.0
+Metal: 1
+Shortkey: 7
+Show: 1
+LayerEnd
+
+LayerStart: YS
+Layer: 33
+Height: 1300
+Thickness: 740
+Red: 0.6
+Green: 0.0
+Blue: 0.9
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 7
+Show: 1
+LayerEnd
+
+LayerStart: JA
+Layer: 4349
+Height: 2040
+Thickness: 1040
+Red: 0.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 8
+Show: 1
+LayerEnd
+
+LayerStart: JQ
+Layer:  58
+Height: 3080
+Thickness: 680
+Red: 0.85
+Green: 0.8
+Blue: 0.0
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 8
+Show: 1
+LayerEnd
+
+LayerStart: OI
+Layer:  59
+Height: 3760
+Thickness: 3300
+Red: 0.37
+Green: 0.0
+Blue: 0.9
+Filter: 0.0
+Metal: 1
+Shortkey: 9
+Show: 1
+LayerEnd
+
+LayerStart: VV
+Layer:  70
+Height: 7060
+Thickness: 700
+Red: 1.0
+Green: 1.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 9
+Show: 1
+LayerEnd
+
+LayerStart: LB
+Layer:  69
+Height: 7760
+Thickness: 2900
+Red: 0.2
+Green: 0.7
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 0
+Show: 1
+LayerEnd
+
+# End of the file
+
