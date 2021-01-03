@@ -1,54 +1,115 @@
-#!/usr/bin/python
+#!/zsc/cad/util/python3/3.6.1.el6/bin/python3
+# !!!!!!!! This script requires python3. It is not loaded by default (do not ask why!), so you have to load it with module load python3 in the cluster.
+####!/usr/bin/python  --> does not work on the cluster. PAthlib requires python 3.5+
 # Initial version - zti 2018-01-15
+# Netlist generation in the local folder - zti 2018-03-01
+# Added Pathlib, and logger 2020-12-31
+
+# To do: avoid the long path. I want the netlist in the pwd. I do not want 3-4 hierarchy, just the files.
+# NOTE: default netlisting library in OCEAN if nothing else is specified is like "~/simulation/<cell>/<simulator>/<cellview>/netlist/input.scs"
 
 import argparse
 import os
+import subprocess
+import logging
+from pathlib import Path
 
+########################################################
+# Initialize the logger
+########################################################
+logger = logging.getLogger("netlister")
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler() # consol handler
+ch.setLevel(logging.DEBUG)
+ch.setFormatter( logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s') )
+logger.addHandler(ch)
+
+########################################################
+# Parsing input arguments
+########################################################
 parser = argparse.ArgumentParser(description="Script to make netlisting easier from the command line")
 parser.add_argument("-l", "--library", help="library name of the design to be netlisted", default=False, required=True)
 parser.add_argument("-c", "--cell", help="cell name of the design to be netlisted", default=False, required=True)
-parser.add_argument("-v", "--view", help="cellview name of the design to be netlisted", default=False, required=True)
-parser.add_argument("-d", "--dir", help="specify the path to the df2 directory in your workspace. (Workspace= your 'username' directory.) Relative paths are referenced to the user's workspace.", default="", required=False)
-parser.add_argument("-s", "--simdir", help="simulation directory, i.e. where the netlist should be created. Relative paths are related to the df2 directory", default="", required=False)
+parser.add_argument("-v", "--view", help="cellview name of the design to be netlisted", default="schematic")
+parser.add_argument("-u", "--unit", help="ICPRO unit name", default=None)
+parser.add_argument("-d", "--dir", help="specify the path to the df2 directory in your workspace. (Workspace= your 'username' directory.) Relative paths are referenced to the user's workspace. If -u, --unit is specified, this is not needed. Using the script outside ICPRO environment might require a full path here.", 
+				required=False)
+parser.add_argument("-s", "--simdir", help="simulation directory, i.e. where the netlist should be created. Relative paths are related to the df2 directory", 
+				type=str,  required=False)
 parser.add_argument("-f", "--tempfile", help="temporary ocean file", default="", required=False)
 parser.add_argument("-q", "--quiet", help="Does not run the netlisting, just generates the temporary ocean file used for netlisting", action="store_true", required=False)
 args = parser.parse_args()
+logger.debug(args)
+logger.info(f"The following cell will be netlisted: {args.library}/{args.cell}/{args.view}")
+pwd = Path.cwd()
 
-# Should the .ocn_netlist.ocn file generated in the simdir? - Seems logical
-
-pwd = os.getcwd()
-
-# ocean needs to be started form the df2 directory,otherwise the cds.lib will be overwritten. It might not be the case at other locations. 
-icpro_dir=os.environ.get("ICPRO_DIR")
-assert icpro_dir, "The needed environment variables are not defined. Try run icpro first."
-if args.dir != "": 
-	if args.dir[0] != "/":
-		df2_dir = os.path.join(icpro_dir,args.dir)
+########################################################
+# Determining the location of the DF2 directory where Cadence is strarted from 
+########################################################
+icpro_dir=Path(os.environ.get("ICPRO_DIR"))
+assert icpro_dir, "The needed environment variable (ICPRO_DIR) is not defined. Run icpro first."
+if args.unit is not None:
+	df2_dir = icpro_dir / "units" / args.unit / "df2"
+elif args.dir != "": 
+	if args.dir[0] != "/" and args.dir[0:1] != "./":
+		df2_dir = icpro_dir / args.dir
 	else:
 		df2_dir = args.dir
 else: 
-	df2_dir = "./"
-os.chdir(df2_dir)
+	raise Exception("The location of the df2 directory is undefined. Ocean has to be run from that directory for netlisting, otherwise it will not only be unable to netlist the specified design, but it will mess up your running Cadence session by redefining environment variables and overwriting cds.lib.")
 
-print("df2 directory: " + os.path.abspath(df2_dir))		
+########################################################
+# Simulation directory where the netlist should be created
+########################################################
+if args.simdir is not None:
+	sim_dir = Path(args.simdir)
+else:
+	sim_dir = Path.home() /  "simulation" / args.library # / args.cell / args.view / "netlist"  
+sim_dir.mkdir(mode=0o750, parents=True, exist_ok=True ) # make sure the directory exists
+logger.info("The netlisting directory is: " + str(sim_dir.absolute()))
 
-# Writing the ocean file for netlisting
+########################################################
+# Creating the OCEAN file, which will do the netlisting
+########################################################
 if args.tempfile == "":
 	tmp_filename = ".nl_" + args.library + "_" + args.cell + "_" + args.view + ".ocn"
 else:
 	tmp_filename = args.tempfile
-f_tmp = open(tmp_filename,'w')
+f_tmp = open(sim_dir / tmp_filename,'w')
 f_tmp.write(";Autogenerated netlisting ocean file\n")
-if args.simdir != "":
-	if args.simdir !=	"/":
-		sim_dir = os.path.join(icpro_dir, args.simdir)
-	else:
-		sim_dir = args.simdir
-	f_tmp.write("envSetVal( \"asimenv.startup\" \"projectDir\" 'string \"" + sim_dir + "\" ) \n" )
+f_tmp.write("envSetVal( \"asimenv.startup\" \"projectDir\" 'string \"" + str(sim_dir.absolute()) + "\" ) \n" )
 f_tmp.write("simulator('spectre) \n")
 f_tmp.write("design(\"" + args.library + "\" \"" + args.cell + "\" \"" + args.view + "\") \n")  
 f_tmp.write("createNetlist( ?recreateAll t ?display nil) \n")
 f_tmp.close()
 
+########################################################
+# Running the netlisting
+########################################################
 if not args.quiet:
-	os.system("ocean < " + tmp_filename)
+	os.chdir(df2_dir)
+	logger.info(f"Changing to DF2 directory: {os.path.abspath(df2_dir)}")
+	logger.info("Starting OCEAN netlisting...")
+	# os.system("ocean < " + str( (sim_dir / tmp_filename).absolute()) )
+	with open(sim_dir / "ocean.log", "w+") as ocn_log:
+		with open(sim_dir / tmp_filename, "r") as f_ocn:
+			logger.info(f"Output of the OCEAN script is redirected into log file {ocn_log.absolute()}")
+			# subprocess.run("ocean < " + str( (sim_dir / tmp_filename).absolute()), stdout=ocn_log )
+			subprocess.run(["ocean"], stdout=ocn_log, stdin=f_ocn)
+	# It might worth a try with "virtuoso -nograph -log ./CDS.log << " + tmp_filename
+
+########################################################
+# Create a spectre.spe file. It was implemented in bash 
+########################################################
+# Why should we change to this directory? --> it's probably safer, due to the bash script
+cmd_dir = sim_dir / args.cell / "spectre" / args.view / "netlist" # This is Cadence convention. It is not strictly necessary to follow this path
+cmd_dir.mkdir(parents=True, exist_ok=True)
+os.chdir(cmd_dir)
+logger.info("creating spe file...")
+
+# os.system("/home/tibenszky/bin/netlist_spectre_spe.sh")
+subprocess.run("/home/tibenszky/bin/netlist_spectre_spe.sh")
+
+# get back to pwd
+os.chdir(pwd)
+
