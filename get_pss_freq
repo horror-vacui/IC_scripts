@@ -1,0 +1,87 @@
+#!/zsc/cad/util/python3/3.6.1.el6/bin/python3
+
+# This script will go traverse through the hierarchy and collect the PSS frequencies of each run from the spectre.out files.
+
+import os
+import pandas as pd
+import numpy as np
+import argparse
+import re
+import logging
+from sys import argv
+from pathlib import Path
+from quantiphy import Quantity
+
+re_psf_dir = re.compile("psf_TEMP(?P<temp>[-?\d\.]+)_VBN(?P<vbn>[-\d\.]+)_VBP?(?P<vbp>[-\d\.]+)_VDCIN(?P<vdcin>[-\d\.]*)_VDD(?P<vdd>[\d\.]+)")
+re_match_pattern  = re.compile("Fundamental frequency is (.*).")
+re_error_pattern = re.compile("spectre completes with (?P<error>\d+) errors?, (?P<warning>\d+) warnings?, and (?P<notice>\d+) notices?.")
+
+fmin = Quantity('0.1 GHz')
+fmax = Quantity('100 GHz')
+
+########################################################
+# Initialize the logger
+########################################################
+logger = logging.getLogger(argv[0])
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter( logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(ch)
+
+########################################################
+# Parsing input arguments
+########################################################
+parser = argparse.ArgumentParser(description="Collecting PSS frequencies from multiple runs in separate output directories. The script uses an internal regex to obtain the paramter values from the runs.")
+parser.add_argument("dir", help="The directory where the search should start", type=Path, default=Path("./"))
+parser.add_argument("out", help="The csv file containing the output", type=Path, default=Path("./pss_freq.csv"))
+# TODO: additional spectre arguments, i.e. postlayout=hpa, ++aps
+args = parser.parse_args()
+logger.debug(args)
+
+
+########################################################
+def pss_freq(fname):
+	n_error, n_warning, n_notice, freq = None, None, None, None
+	with open(fname / "spectre.out", 'r') as f:
+		for line in f:
+			p=re_match_pattern.match(line)
+			if p:
+				freq = Quantity(p.group(1))
+				logger.info(f"The self resonance frequency: {freq}")
+			e=re_error_pattern.match(line)
+			if e:
+				logger.debug(line)
+				n_error, n_warning, n_notice = [int(i) for i in e.groups()]
+	if n_error != 0: # if there was any error, probably there was no fundamental freq anyway
+		freq = None
+	return freq
+
+########################################################
+
+df = pd.DataFrame(columns=["vdd","vbn","vbp","vdcin","temp","freq"], dtype=np.float64)
+
+# Traversing directory structure
+for child in args.dir.iterdir():
+	m = re_psf_dir.match(child.name)
+	if m:
+		logger.info(f"Reading {child}")
+		temp, vbn, vbp, vdcin, vdd = [float(i) for i in m.groups()]
+		f = pss_freq(child)		
+		if f:
+			if f<fmax and f>fmin:
+				df = df.append({
+								"vdd":vdd,
+								"vbn":vbn,
+								"vbp":vbp,
+								"vdcin":vdcin,
+								"temp":temp,
+								"freq":f*1e-9 # norm to GHz
+								}, 
+								ignore_index=True
+								)
+print(df)
+df.to_csv(args.out, index=False)
+
+
+
